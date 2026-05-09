@@ -99,7 +99,7 @@ AI 不再各说各话。像团队一样按流水线协作：
 
 ```bash
 # 克隆
-git clone https://github.com/yourname/ai-rules-center.git
+git clone https://github.com/winstonice-prog/ai-rules-center.git
 cd ai-rules-center
 
 # 安装

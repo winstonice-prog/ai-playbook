@@ -10,7 +10,7 @@ import ModelSelector from '@/components/ModelSelector'
 import SetupWizard from '@/components/SetupWizard'
 import SettingsPanel from '@/components/SettingsPanel'
 import { useChatStore } from '@/lib/store'
-import { Shield, Settings2, Wrench, Radio, GitBranch, Languages } from 'lucide-react'
+import { Settings2, Wrench, Radio, GitBranch, Languages } from 'lucide-react'
 import { t } from '@/lib/i18n'
 
 export default function Home() {
@@ -26,129 +26,131 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false)
   const [showOrchSetup, setShowOrchSetup] = useState(mode === 'orchestrate')
 
-  const T = (key: keyof typeof import('@/lib/i18n').zh, params?: Record<string, string | number>) =>
-    t(lang, key, params)
+  const T = (k: keyof typeof import('@/lib/i18n').zh, p?: Record<string, string | number>) => t(lang, k, p)
 
-  useEffect(() => {
-    setHydrated(true)
-  }, [])
-
-  useEffect(() => {
-    if (mode === 'orchestrate') setShowOrchSetup(true)
-  }, [mode])
+  useEffect(() => { setHydrated(true) }, [])
+  useEffect(() => { if (mode === 'orchestrate') setShowOrchSetup(true) }, [mode])
 
   if (!hydrated) return null
 
   const activeRules = ruleBook.rules.filter((r) => r.enabled && r.content).length
-  const configuredModels = Object.values(apiKeys).filter(Boolean).length
+  const configured = Object.values(apiKeys).filter(Boolean).length
 
   return (
     <>
       {!wizardDone && <SetupWizard onDone={() => {}} />}
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
 
-      <div className="flex h-screen flex-col bg-panel-bg">
+      <div className="flex h-screen flex-col bg-surface">
         {/* Header */}
-        <header className="border-b border-panel-border px-4 py-2 flex items-center gap-3 select-none">
-          <div className="flex items-center gap-2">
-            <Shield size={18} className="text-panel-accent" />
-            <span className="text-sm font-semibold tracking-wide hidden sm:inline">{T('appTitle')}</span>
+        <header className="h-12 border-b border-border flex items-center px-4 gap-3 shrink-0 select-none bg-surface-secondary/50 backdrop-blur">
+          {/* Logo */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+              <div className="w-3 h-3 rounded-sm bg-accent" />
+            </div>
+            <span className="text-[13px] font-semibold tracking-tight text-text-primary">
+              AI Playbook
+            </span>
           </div>
 
-          {/* Mode switcher */}
-          <div className="flex items-center bg-panel-card border border-panel-border rounded-lg p-0.5">
+          {/* Mode switch */}
+          <div className="flex items-center bg-surface-card border border-border rounded-md p-0.5 ml-2">
             <button onClick={() => setMode('broadcast')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] transition-all ${
-                mode === 'broadcast' ? 'bg-panel-accent text-white' : 'text-gray-500 hover:text-gray-300'}`}>
-              <Radio size={12} />{T('broadcast')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded text-[12px] font-medium transition-all ${
+                mode === 'broadcast' ? 'bg-accent text-white shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}>
+              <Radio size={13} />{T('broadcast')}
             </button>
             <button onClick={() => setMode('orchestrate')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] transition-all ${
-                mode === 'orchestrate' ? 'bg-panel-accent text-white' : 'text-gray-500 hover:text-gray-300'}`}>
-              <GitBranch size={12} />{T('orchestrate')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded text-[12px] font-medium transition-all ${
+                mode === 'orchestrate' ? 'bg-accent text-white shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}>
+              <GitBranch size={13} />{T('orchestrate')}
             </button>
           </div>
 
+          {/* Model selector */}
           <div className="flex-1 flex justify-center">
             <ModelSelector />
           </div>
 
-          <div className="flex items-center gap-1">
-            {/* Language toggle */}
+          {/* Actions */}
+          <div className="flex items-center gap-0.5">
             <button onClick={toggleLang}
-              className="flex items-center gap-1 text-xs px-2 py-1 rounded text-gray-500 hover:text-gray-300 transition-colors"
-              title="Switch Language">
-              <Languages size={13} />
-              <span className="hidden sm:inline text-[10px]">{lang === 'zh' ? 'EN' : '中'}</span>
+              className="h-8 w-8 flex items-center justify-center rounded-md text-text-muted hover:text-text-secondary hover:bg-surface-hover transition-colors"
+              title="Language">
+              <Languages size={15} />
             </button>
 
-            {/* Orchestrate config */}
             {mode === 'orchestrate' && (
               <button onClick={() => setShowOrchSetup(!showOrchSetup)}
-                className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-all ${
-                  showOrchSetup ? 'bg-panel-accent-soft text-panel-accent' : 'text-gray-500 hover:text-gray-300'}`}
-                title="Workflow Config">
-                <GitBranch size={13} />
-                <span className="hidden sm:inline">{T('configure')}</span>
+                className={`h-8 px-2.5 flex items-center gap-1.5 rounded-md text-[12px] font-medium transition-all ${
+                  showOrchSetup ? 'bg-accent-soft text-accent' : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'}`}>
+                <GitBranch size={13} />{T('configure')}
               </button>
             )}
 
-            {/* Rules - always available */}
             <button onClick={() => setShowRules(!showRules)}
-              className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-all ${
-                showRules ? 'bg-panel-accent-soft text-panel-accent' : 'text-gray-500 hover:text-gray-300'}`}>
-              <Settings2 size={13} />
-              <span className="hidden sm:inline">{T('rules')}</span>
+              className={`h-8 px-2.5 flex items-center gap-1.5 rounded-md text-[12px] font-medium transition-all ${
+                showRules ? 'bg-accent-soft text-accent' : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'}`}>
+              <Settings2 size={13} />{T('rules')}
               {activeRules > 0 && (
-                <span className="bg-panel-accent text-white text-[9px] px-1 rounded-full min-w-[16px] text-center">{activeRules}</span>
+                <span className="bg-accent text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full leading-none">{activeRules}</span>
               )}
             </button>
 
             <button onClick={() => setShowSettings(true)}
-              className="flex items-center gap-1 text-xs px-2 py-1 rounded text-gray-500 hover:text-gray-300 transition-colors">
-              <Wrench size={13} />
-              <span className="hidden sm:inline">{T('settings')}</span>
-              {configuredModels > 0 && (
-                <span className="bg-panel-success/20 text-panel-success text-[9px] px-1 rounded-full">{configuredModels}</span>
-              )}
+              className="h-8 w-8 flex items-center justify-center rounded-md text-text-muted hover:text-text-secondary hover:bg-surface-hover transition-colors">
+              <Wrench size={15} />
             </button>
           </div>
         </header>
 
         <StatusBar />
 
-        {/* Main Content */}
+        {/* Body */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Left sidebar */}
-          <div className={`border-r border-panel-border overflow-hidden transition-all duration-200 ${
-            showRules || (mode === 'orchestrate' && showOrchSetup) ? 'w-80 flex-shrink-0' : 'w-0'
+          {/* Sidebar */}
+          <div className={`border-r border-border overflow-hidden transition-all duration-200 bg-surface-secondary ${
+            showRules || (mode === 'orchestrate' && showOrchSetup) ? 'w-80 shrink-0' : 'w-0'
           }`}>
             {mode === 'broadcast' && showRules && <RulesPanel />}
             {mode === 'orchestrate' && showOrchSetup && (
               showRules ? (
                 <div className="flex flex-col h-full">
-                  <div className="flex border-b border-panel-border">
-                    <button onClick={() => setShowOrchSetup(true)}
-                      className={`flex-1 py-1.5 text-[10px] font-medium ${showOrchSetup ? 'text-panel-accent border-b border-panel-accent' : 'text-gray-600'}`}>
+                  <div className="flex border-b border-border px-1">
+                    <button onClick={() => { setShowOrchSetup(true); setShowRules(false) }}
+                      className={`flex-1 py-2 text-[12px] font-medium border-b-2 transition-colors ${
+                        !showRules ? 'border-accent text-text-primary' : 'border-transparent text-text-muted hover:text-text-secondary'}`}>
                       {T('configure')}
                     </button>
-                    <button onClick={() => setShowRules(true)}
-                      className={`flex-1 py-1.5 text-[10px] font-medium ${!showOrchSetup ? 'text-panel-accent border-b border-panel-accent' : 'text-gray-600'}`}>
+                    <button onClick={() => { setShowRules(true); setShowOrchSetup(false) }}
+                      className={`flex-1 py-2 text-[12px] font-medium border-b-2 transition-colors ${
+                        showRules && !showOrchSetup ? 'border-accent text-text-primary' : 'border-transparent text-text-muted hover:text-text-secondary'}`}>
                       {T('rules')}
                     </button>
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <OrchSetup />
-                  </div>
+                  <div className="flex-1 overflow-hidden"><OrchSetup /></div>
                 </div>
-              ) : (
-                <OrchSetup />
-              )
+              ) : <OrchSetup />
             )}
-            {mode === 'orchestrate' && !showOrchSetup && showRules && <RulesPanel />}
+            {mode === 'orchestrate' && showRules && !showOrchSetup && (
+              <div className="flex flex-col h-full">
+                <div className="flex border-b border-border px-1">
+                  <button onClick={() => { setShowOrchSetup(true); setShowRules(false) }}
+                    className="flex-1 py-2 text-[12px] font-medium border-b-2 border-transparent text-text-muted hover:text-text-secondary transition-colors">
+                    {T('configure')}
+                  </button>
+                  <button onClick={() => { setShowRules(true); setShowOrchSetup(false) }}
+                    className="flex-1 py-2 text-[12px] font-medium border-b-2 border-accent text-text-primary transition-colors">
+                    {T('rules')}
+                  </button>
+                </div>
+                <div className="flex-1 overflow-hidden"><RulesPanel /></div>
+              </div>
+            )}
           </div>
 
-          {/* Main panel */}
+          {/* Main */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {mode === 'broadcast' ? <ChatPanel /> : <OrchPanel />}
           </div>

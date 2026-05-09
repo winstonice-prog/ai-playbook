@@ -4,15 +4,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        panel: {
-          bg: '#0f1117',
-          card: '#1a1d27',
-          border: '#2a2d3a',
-          accent: '#6c5ce7',
-          'accent-soft': 'rgba(108,92,231,0.15)',
-          success: '#00d2a0',
-          warn: '#ffb347',
-          danger: '#ff5e5e',
+        surface: {
+          DEFAULT: '#0a0a0f',
+          secondary: '#111118',
+          card: '#16161f',
+          hover: '#1c1c28',
+        },
+        border: {
+          DEFAULT: '#232330',
+          light: '#2a2a3a',
+        },
+        accent: {
+          DEFAULT: '#7c6ff7',
+          soft: 'rgba(124,111,247,0.12)',
         },
       },
     },

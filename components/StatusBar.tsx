@@ -14,51 +14,41 @@ export default function StatusBar() {
   const apiKeys = useChatStore((s) => s.apiKeys)
 
   const T = (k: Parameters<typeof t>[1], p?: Record<string, string | number>) => t(lang, k, p)
-  const enabledModels = [...models, ...customModels].filter((m) => m.enabled)
+  const enabled = [...models, ...customModels].filter((m) => m.enabled)
   const activeRules = ruleBook.rules.filter((r) => r.enabled && r.content).length
 
-  function getModelStatus(modelId: string) {
-    const s = modelStatuses.find((m) => m.modelId === modelId)
-    if (!s) return { status: 'idle', label: T('idle'), icon: null }
-    switch (s.status) {
-      case 'loading': return { status: 'loading', label: T('loading'), icon: <Loader2 size={10} className="animate-spin text-panel-accent" /> }
-      case 'done': return s.triggeredRules.length > 0
-        ? { status: 'warn', label: T('needReview'), icon: <AlertTriangle size={10} className="text-panel-warn" /> }
-        : { status: 'done', label: T('done'), icon: <CheckCircle2 size={10} className="text-panel-success" /> }
-      case 'error': return { status: 'error', label: T('error'), icon: <AlertTriangle size={10} className="text-panel-danger" /> }
-      default: return { status: 'idle', label: T('idle'), icon: null }
-    }
-  }
-
-  const statusDot: Record<string, string> = { idle: 'bg-gray-700', loading: 'bg-panel-accent animate-pulse', done: 'bg-panel-success', warn: 'bg-panel-warn animate-pulse', error: 'bg-panel-danger' }
-
-  if (enabledModels.length === 0) {
+  if (enabled.length === 0) {
     return (
-      <div className="bg-panel-card border-b border-panel-border px-4 py-1.5 flex items-center gap-2 text-[10px] text-gray-600">
-        <WifiOff size={11} />{T('noModelsEnabled')}
+      <div className="bg-surface-card border-b border-border px-4 py-2 flex items-center gap-2 text-[12px] text-text-muted">
+        <WifiOff size={13} />{T('noModelsEnabled')}
       </div>
     )
   }
 
   return (
-    <div className="bg-panel-card border-b border-panel-border px-4 py-1.5 flex items-center gap-3 text-[10px] overflow-x-auto">
-      {enabledModels.map((m) => {
-        const st = getModelStatus(m.id)
+    <div className="bg-surface-card border-b border-border px-4 py-1.5 flex items-center gap-4 text-[11px] overflow-x-auto">
+      {enabled.map((m) => {
+        const s = modelStatuses.find((x) => x.modelId === m.id)
         const hasKey = !!apiKeys[m.id]
+        const status = !s ? 'idle' : s.status === 'loading' ? 'loading' : s.status === 'done' ? (s.triggeredRules.length > 0 ? 'warn' : 'done') : 'error'
+        const labels: Record<string, string> = { idle: T('idle'), loading: T('loading'), done: T('done'), warn: T('needReview'), error: T('error') }
+        const dotColors: Record<string, string> = { idle: 'bg-border-light', loading: 'bg-accent animate-pulse', done: 'bg-green', warn: 'bg-amber animate-pulse', error: 'bg-red' }
         return (
-          <div key={m.id} className="flex items-center gap-1.5 flex-shrink-0">
-            {hasKey ? <Wifi size={10} className="text-panel-success" /> : <WifiOff size={10} className="text-gray-700" />}
-            <span className={`w-1.5 h-1.5 rounded-full ${statusDot[st.status]}`} />
-            <span style={{ color: m.color }} className="font-medium">{m.name}</span>
-            <span className="text-gray-600">{st.label}</span>
-            {st.icon}
+          <div key={m.id} className="flex items-center gap-2 shrink-0">
+            {hasKey ? <Wifi size={11} className="text-green/70" /> : <WifiOff size={11} className="text-text-muted/40" />}
+            <span className={`w-1.5 h-1.5 rounded-full ${dotColors[status]}`} />
+            <span className="font-medium" style={{ color: m.color }}>{m.name}</span>
+            <span className="text-text-muted">{labels[status]}</span>
+            {status === 'loading' && <Loader2 size={10} className="animate-spin text-accent" />}
+            {status === 'done' && <CheckCircle2 size={10} className="text-green/70" />}
+            {status === 'warn' && <AlertTriangle size={10} className="text-amber" />}
           </div>
         )
       })}
-      <div className="ml-auto flex items-center gap-3 text-gray-600 flex-shrink-0">
-        <span>{T('modelsCount', { n: enabledModels.length })}</span>
+      <div className="ml-auto flex items-center gap-4 text-text-muted shrink-0">
+        <span>{T('modelsCount', { n: enabled.length })}</span>
         <span>{T('rulesCount', { n: activeRules })}</span>
-        {sending && <span className="text-panel-accent animate-pulse">{T('processing')}</span>}
+        {sending && <span className="text-accent font-medium">Processing…</span>}
       </div>
     </div>
   )
